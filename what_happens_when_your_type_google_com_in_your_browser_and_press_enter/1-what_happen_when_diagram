@@ -1,0 +1,72 @@
+                    USER / BROWSER
+                         |
+                         | 1. https://www.google.com
+                         |
+                         v
+                +------------------+
+                |       DNS        |
+                |                  |
+                | google.com       |
+                |       ↓          |
+                |   IP Address     |
+                +--------+---------+
+                         |
+                         | 2. Connect to
+                         |    SERVER_IP:443
+                         |    HTTPS 🔒
+                         v
+                +------------------+
+                |     FIREWALL     |
+                |                  |
+                | Allow TCP :443   |
+                +--------+---------+
+                         |
+                         | 3. Encrypted HTTPS
+                         v
+                +------------------+
+                |   LOAD BALANCER  |
+                |                  |
+                |  Distributes     |
+                |    requests      |
+                +--------+---------+
+                         |
+                 +-------+-------+
+                 |               |
+                 v               v
+          +-------------+   +-------------+
+          | WEB SERVER  |   | WEB SERVER  |
+          |   Nginx     |   |   Nginx     |
+          +------+------+   +-------------+
+                 |
+                 | 4. Request forwarded
+                 v
+          +------------------+
+          | APPLICATION      |
+          | SERVER           |
+          |                  |
+          | Generates page  |
+          +--------+---------+
+                   |
+                   | 5. Query data
+                   |    from database
+                   v
+          +------------------+
+          |     DATABASE     |
+          |                  |
+          |  MySQL / etc.    |
+          +--------+---------+
+                   |
+                   | Data
+                   v
+          +------------------+
+          | APPLICATION      |
+          | SERVER           |
+          +--------+---------+
+                   |
+                   | Generated webpage
+                   v
+              WEB SERVER
+                   |
+                   | HTTPS 🔒
+                   v
+                BROWSER
