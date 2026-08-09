@@ -1,0 +1,273 @@
+# What Happens When You Type `https://www.google.com` in Your Browser and Press Enter?
+
+Have you ever wondered what happens behind the scenes when you type `https://www.google.com` into your browser and press **Enter**?
+
+It looks simple from the user's perspective: the browser loads a webpage. But behind that simple action, many different systems communicate with each other. DNS, TCP/IP, firewalls, HTTPS, load balancers, web servers, application servers, and databases can all be involved.
+
+Let's follow the request from your computer to the website's infrastructure.
+
+## 1. DNS: Finding Google's IP Address
+
+The first thing the browser needs to know is where `www.google.com` is located.
+
+Humans use domain names such as:
+
+```text
+www.google.com
+```
+
+Computers communicate using IP addresses.
+
+The browser therefore needs to perform a **DNS (Domain Name System) lookup** to translate the domain name into an IP address.
+
+The process may involve your browser cache, operating system cache, DNS resolver cache, and eventually authoritative DNS servers.
+
+Conceptually:
+
+```text
+www.google.com
+       ↓
+      DNS
+       ↓
+IP address
+```
+
+Once the browser knows the IP address, it can start communicating with the destination server.
+
+## 2. TCP/IP: Establishing Communication
+
+Now the computer needs to communicate with the destination IP address.
+
+The **IP** protocol is responsible for addressing and routing packets across networks.
+
+Because HTTPS normally uses TCP, the browser establishes a TCP connection with the destination.
+
+TCP performs a three-way handshake:
+
+```text
+Client → SYN
+Server → SYN-ACK
+Client → ACK
+```
+
+After this handshake, both sides have established a TCP connection.
+
+The browser can now send data reliably to the destination.
+
+## 3. Firewall: Controlling the Traffic
+
+Before reaching the actual servers, the traffic may pass through one or more **firewalls**.
+
+A firewall controls which network connections are allowed or blocked.
+
+For example, a firewall might allow HTTPS traffic on port:
+
+```text
+443
+```
+
+while blocking unauthorized access to internal services such as a database.
+
+Conceptually:
+
+```text
+User
+  |
+  | HTTPS / TCP 443
+  ↓
+Firewall
+  |
+  | allowed
+  ↓
+Infrastructure
+```
+
+Firewalls are an important security layer because internal services should not normally be directly accessible from the public Internet.
+
+## 4. HTTPS and SSL/TLS: Securing the Connection
+
+The URL begins with:
+
+```text
+https://
+```
+
+This means the browser is using **HTTPS**, which is HTTP transmitted over TLS.
+
+The browser and server perform a TLS handshake. During this process, the server presents a certificate that proves its identity for the requested domain.
+
+The connection is then encrypted.
+
+This provides several important properties:
+
+* **Confidentiality:** attackers cannot easily read the transmitted data.
+* **Integrity:** data cannot be silently modified without detection.
+* **Authentication:** the browser can verify the server's identity through its certificate.
+
+The browser can now securely send an HTTP request.
+
+```text
+Browser
+   |
+   | HTTPS 🔒
+   ↓
+Google infrastructure
+```
+
+## 5. Load Balancer: Choosing a Server
+
+Large websites receive enormous numbers of requests, so they generally cannot rely on a single server.
+
+A **load balancer** can sit between users and a group of backend servers.
+
+For example:
+
+```text
+                 Load Balancer
+                 /     |      \
+                ↓      ↓       ↓
+             Server 1 Server 2 Server 3
+```
+
+The load balancer receives the request and decides which backend server should handle it.
+
+Different algorithms can be used, such as **Round Robin**, where requests are distributed sequentially between available servers.
+
+Load balancing provides better performance and allows traffic to be distributed across multiple machines.
+
+It can also detect unhealthy servers and stop sending requests to them.
+
+## 6. Web Server: Handling the HTTP Request
+
+The request eventually reaches a **web server**, such as Nginx or Apache.
+
+The web server is responsible for handling HTTP communication.
+
+For example, it might receive:
+
+```http
+GET / HTTP/1.1
+Host: www.google.com
+```
+
+The web server can serve static resources directly, such as:
+
+* HTML
+* CSS
+* JavaScript
+* images
+
+However, many requests require application logic, so the web server can forward those requests to an application server.
+
+```text
+Load Balancer
+      ↓
+   Web Server
+      ↓
+Application Server
+```
+
+## 7. Application Server: Running the Application
+
+The **application server** executes the website's application logic.
+
+For example, if a request requires authentication, searching data, processing a transaction, or generating dynamic content, the application server performs that work.
+
+Conceptually:
+
+```text
+Web Server
+     |
+     | request
+     ↓
+Application Server
+     |
+     | application logic
+     ↓
+Response
+```
+
+The application server may also need information stored in a database.
+
+## 8. Database: Storing Information
+
+The application server can communicate with a **database**, such as MySQL or PostgreSQL.
+
+The database stores persistent information required by the application.
+
+For example:
+
+```text
+Application Server
+       |
+       | SQL query
+       ↓
+    Database
+       |
+       | result
+       ↓
+Application Server
+```
+
+The application might query the database to retrieve information and then use that information to construct a response.
+
+The database is normally kept behind additional security layers rather than being directly accessible from the Internet.
+
+## 9. The Response Travels Back
+
+After all the necessary processing is complete, the response travels back through the infrastructure.
+
+A simplified view is:
+
+```text
+Browser
+   ↓
+DNS
+   ↓
+TCP/IP
+   ↓
+Firewall
+   ↓
+HTTPS/TLS
+   ↓
+Load Balancer
+   ↓
+Web Server
+   ↓
+Application Server
+   ↓
+Database
+   ↑
+Application Server
+   ↑
+Web Server
+   ↑
+Load Balancer
+   ↑
+HTTPS/TLS
+   ↑
+Browser
+```
+
+The browser receives the response and begins rendering the webpage.
+
+It may also discover additional resources such as JavaScript, CSS, images, and fonts, which can trigger additional HTTP requests.
+
+## The Big Picture
+
+So, what happens when you type `https://www.google.com` and press Enter?
+
+A simplified sequence is:
+
+1. **DNS** translates `www.google.com` into an IP address.
+2. **TCP/IP** establishes network communication with that destination.
+3. A **firewall** checks whether the traffic is allowed.
+4. **HTTPS/TLS** establishes an encrypted connection.
+5. A **load balancer** distributes the request to an appropriate backend server.
+6. A **web server** receives and processes the HTTP request.
+7. An **application server** executes the required application logic.
+8. The **database** provides any required stored information.
+9. The response travels back to the browser.
+10. The browser renders the resulting webpage.
+
+What looks like a simple action—typing a URL and pressing Enter—is actually the result of many layers of networking and software infrastructure working together in milliseconds.
